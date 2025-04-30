@@ -1,0 +1,29 @@
+# Thư mục môi trường ảo (ảo hóa Python)
+.venv/
+venv/
+
+# Cấu hình IDE
+.idea/
+
+# Cơ sở dữ liệu SQLite
+*.sqlite3
+
+# File biên dịch Python
+__pycache__/
+*.pyc
+*.pyo
+
+# File cấu hình hệ thống
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# File tạm và cache
+*.DS_Store
+*.swp
+*.bak
+
+# Tệp môi trường bí mật (nếu có)
+.env
