@@ -1,6 +1,6 @@
 from django.db import models
-from django.conf import settings  # để dùng settings.AUTH_USER_MODEL
-
+from django.conf import settings
+import uuid
 class Project(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -9,6 +9,7 @@ class Project(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) 
     name = models.CharField(max_length=255)
     description = models.TextField()
     owner = models.ForeignKey(
