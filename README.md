@@ -1,7 +1,5 @@
 # Hướng dẫn cài đặt và khởi chạy dự án Django + MySQL
 
-
-
 ## 1. Tạo và kích hoạt môi trường ảo:
 
     - Windows:
@@ -65,7 +63,7 @@
 ## 5. Chạy ứng dụng:
 
     source .venv/bin/activate
-    
+
     python manage.py runserver
 
     Truy cập: http://127.0.0.1:8000

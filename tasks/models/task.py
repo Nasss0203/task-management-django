@@ -1,5 +1,9 @@
-from django.db import models
 import uuid
+
+from django.conf import settings
+from django.db import models
+
+
 class Task(models.Model):
     PRIORITY_CHOICES = [
         ('low', 'Low'),
@@ -8,8 +12,9 @@ class Task(models.Model):
         ('urgent', 'Urgent'),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) 
-    projectId = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    userId = models.ForeignKey('users.User', on_delete=models.CASCADE, null=True)
+    projectId = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     statusId = models.ForeignKey('TaskStatus', on_delete=models.SET_NULL, null=True, blank=True)

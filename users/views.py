@@ -1,19 +1,20 @@
-# users/views.py
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import check_password
 from rest_framework import permissions, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+# 🚪 Logout (JWT: blacklist refresh token)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import CustomTokenObtainPairSerializer, UserSerializer
 
+
+class CustomLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 class UserListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]  # hoặc bỏ nếu cho public
+    permission_classes = [permissions.IsAuthenticated] 
 
     def get(self, request):
         users = User.objects.all()
@@ -56,6 +57,11 @@ class UserLoginView(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 'message': 'Đăng nhập thành công.',
+                'id': user.id,
+                'username': user.username,
+                'role': user.role if hasattr(user, 'role') else None,
+                'is_active': user.is_active,
+                'is_staff': user.is_staff,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             }, status=status.HTTP_200_OK)
@@ -63,20 +69,24 @@ class UserLoginView(APIView):
             return Response({'error': 'Email hoặc mật khẩu không đúng.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-# 🚪 Logout (JWT: blacklist refresh token)
-
 class UserLogoutView(APIView):
-    permission_classes = [AllowAny]  # ✅ Cho phép tất cả gọi logout
-
+    print(APIView)
+    permission_classes = [IsAuthenticated]
+    print(permission_classes)
     def post(self, request):
-        refresh_token = request.data.get('refresh')
+        auth_header = request.headers.get('Authorization')
+        print(auth_header)
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return Response({'error': 'Thiếu Authorization header'}, status=400)
 
-        if not refresh_token:
-            return Response({'error': 'Thiếu refresh token.'}, status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = auth_header.split(' ')[1]
+        print(refresh_token)
 
         try:
+            # Kiểm tra token loại Refresh
             token = RefreshToken(refresh_token)
+            # Chỉ blacklist refresh token
             token.blacklist()
-            return Response({'message': 'Đăng xuất thành công.'}, status=status.HTTP_205_RESET_CONTENT)
-        except TokenError:
-            return Response({'error': 'Token không hợp lệ hoặc đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Đăng xuất thành công.'}, status=205)
+        except TokenError as e:
+            return Response({'error': f'Token không hợp lệ hoặc đã hết hạn: {str(e)}'}, status=400)
