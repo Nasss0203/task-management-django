@@ -10,18 +10,33 @@ from .models import Task
 from .serializers import TaskSerializer
 
 
+# Task
 class TaskListCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         tasks = Task.objects.filter(userId=request.user).order_by('-createdAt')
-        
+
+        # Lấy các query param nếu có
+        status_param = request.query_params.get('status')
+        priority_param = request.query_params.get('priority')
+        due_date_param = request.query_params.get('due_date')  # định dạng: YYYY-MM-DD
+
+        if status_param:
+            tasks = tasks.filter(status=status_param)
+
+        if priority_param:
+            tasks = tasks.filter(priority=priority_param)
+
+        if due_date_param:
+            tasks = tasks.filter(dueDate=due_date_param)
+
         if not tasks.exists():
             return Response({"detail": "No tasks found for this user."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Serialize tasks và trả về phản hồi
+
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
+
 
     def post(self, request):
         serializer = TaskSerializer(data=request.data, context={'request': request})
@@ -78,3 +93,4 @@ class DeleteTaskView(APIView):
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# End Task

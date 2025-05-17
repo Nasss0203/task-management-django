@@ -22,7 +22,7 @@ class Task(models.Model):
     userId = models.ForeignKey('users.User', on_delete=models.CASCADE, null=True)
     projectId = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES)
     due_date = models.DateField()

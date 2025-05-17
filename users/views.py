@@ -57,13 +57,17 @@ class UserLoginView(APIView):
             refresh = RefreshToken.for_user(user)
             return Response({
                 'message': 'Đăng nhập thành công.',
-                'id': user.id,
-                'username': user.username,
-                'role': user.role if hasattr(user, 'role') else None,
-                'is_active': user.is_active,
-                'is_staff': user.is_staff,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'data':{
+                    'id': user.id,
+                    'username': user.username,
+                    'role': user.role if hasattr(user, 'role') else None,
+                    'is_active': user.is_active,
+                    'is_staff': user.is_staff,
+                },
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Email hoặc mật khẩu không đúng.'}, status=status.HTTP_401_UNAUTHORIZED)
