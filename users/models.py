@@ -30,7 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="member")
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="member", null=True, blank=True)
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)

@@ -20,12 +20,19 @@ class Task(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     userId = models.ForeignKey('users.User', on_delete=models.CASCADE, null=True)
-    projectId = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True, blank=True)
+    projectId = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='tasks'  # thêm dòng này
+    )
     title = models.CharField(max_length=255)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES)
     due_date = models.DateField()
+    # tags = models.ManyToManyField(Tag, blank=True, related_name='tasks')
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True, null=True)
 

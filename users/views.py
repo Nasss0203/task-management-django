@@ -17,6 +17,8 @@ class UserListView(APIView):
     permission_classes = [permissions.IsAuthenticated] 
 
     def get(self, request):
+        if not (hasattr(request.user, 'role') and request.user.role in ['admin', 'manager']):
+            return Response({'error': 'Chỉ admin hoặc manager được phép truy cập.'}, status=status.HTTP_403_FORBIDDEN)
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)

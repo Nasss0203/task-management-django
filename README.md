@@ -17,8 +17,10 @@
     Nếu chưa có:
         pip install django
         pip install djangorestframework
-        pip install mysqlclient
-        (hoặc thay bằng: pip install pymysql)
+        pip install djangorestframework-simplejwt
+        pip install django-cors-headers
+        pip install cryptography
+        pip install pymysql
 
 ## 3. Cấu hình kết nối MySQL trong settings.py:
 
@@ -62,7 +64,7 @@
 
 ## 5. Chạy ứng dụng:
 
-    source .venv/bin/activate
+    .venv\Scripts\activate
 
     python manage.py runserver
 
