@@ -2,6 +2,12 @@ from rest_framework import serializers
 
 from tasks.serializers import TaskSerializer
 from .models import Project
+from users.models import User
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email'] 
 
 class ProjectSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)

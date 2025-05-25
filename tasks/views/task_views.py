@@ -98,4 +98,24 @@ class DeleteTaskView(APIView):
         task = get_object_or_404(Task, id=pk, userId=request.user)
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+# Lấy danh sách công việc của một project
+class ProjectTaskListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id, members=request.user)
+        except Project.DoesNotExist:
+            return Response({"detail": "Project not found or you are not a member."}, status=status.HTTP_404_NOT_FOUND)
+
+        tasks = Task.objects.filter(projectId=project).order_by('-createdAt')
+        if not tasks.exists():
+            return Response({"detail": "No tasks found for this project."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+    
+
 # End Tasks

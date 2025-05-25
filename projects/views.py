@@ -7,7 +7,7 @@ from rest_framework import status, permissions
 from .permissions import IsProjectOwnerOrManager
 from tasks.serializers import TaskSerializer
 from .models import Project
-from .serializers import ProjectSerializer
+from .serializers import ProjectSerializer,UserSerializer
 from users.models import User
 from tasks.models import Task
 
@@ -166,3 +166,56 @@ class RemoveTaskFromProjectView(APIView):
         task.projectId = None
         task.save()
         return Response({'message': 'Task removed from project.'}, status=status.HTTP_200_OK)
+    
+
+# Fetch danh sách thành viên của project
+class ProjectMembersView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+
+        if request.user not in project.members.all() and request.user != project.owner:
+            return Response({'error': 'Bạn không có quyền truy cập vào project này.'}, status=403)
+
+        members = project.members.all()
+
+        serializer = UserSerializer(members, many=True)
+        return Response(serializer.data)
+
+class ProjectTaskListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+
+        if request.user not in project.members.all():
+            return Response({'error': 'Bạn không thuộc project này.'}, status=status.HTTP_403_FORBIDDEN)
+
+        tasks = Task.objects.filter(projectId=project)
+
+        status_param = request.query_params.get('status')
+        if status_param:
+            tasks = tasks.filter(status=status_param)
+
+        if not tasks.exists():
+            return Response({"detail": "No tasks found for this project."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serialize danh sách task
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+    
+# Lấy danh sách các project mà người dùng sở hữu hoặc là thành viên
+class MyProjectsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        owned_projects = Project.objects.filter(owner=user)
+        member_projects = Project.objects.filter(members=user).exclude(owner=user)
+
+        projects = owned_projects | member_projects
+
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data)
