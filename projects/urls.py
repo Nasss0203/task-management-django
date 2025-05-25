@@ -9,14 +9,13 @@ from .views import (
     TaskCreateInProjectView,
     RemoveMemberFromProjectView,
     RemoveTaskFromProjectView,
-    ProjectTaskListView, 
     ProjectMembersView,
-    MyProjectsView
+    MyProjectsView,
+    ProjectProgressView
 )
 
 urlpatterns = [
     path('my-projects/', MyProjectsView.as_view(), name='my-project-list'),
-
     path('', ProjectListView.as_view(), name='project-list'),
     path('create/', ProjectCreateView.as_view(), name='project-create'),
     path('<str:pk>/', ProjectDetailView.as_view(), name='project-detail'),
@@ -40,5 +39,9 @@ urlpatterns = [
 
     # Danh sách thành viên của project
     path('members/<str:project_id>/', ProjectMembersView.as_view(), name='project-members'),
+
+
+    path('progress/<str:project_id>/', ProjectProgressView.as_view(), name='project-progress'),
+
 
 ]

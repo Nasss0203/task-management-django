@@ -183,28 +183,7 @@ class ProjectMembersView(APIView):
         serializer = UserSerializer(members, many=True)
         return Response(serializer.data)
 
-class ProjectTaskListView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, project_id):
-        project = get_object_or_404(Project, pk=project_id)
-
-        if request.user not in project.members.all():
-            return Response({'error': 'Bạn không thuộc project này.'}, status=status.HTTP_403_FORBIDDEN)
-
-        tasks = Task.objects.filter(projectId=project)
-
-        status_param = request.query_params.get('status')
-        if status_param:
-            tasks = tasks.filter(status=status_param)
-
-        if not tasks.exists():
-            return Response({"detail": "No tasks found for this project."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Serialize danh sách task
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
-    
 # Lấy danh sách các project mà người dùng sở hữu hoặc là thành viên
 class MyProjectsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -215,7 +194,55 @@ class MyProjectsView(APIView):
         owned_projects = Project.objects.filter(owner=user)
         member_projects = Project.objects.filter(members=user).exclude(owner=user)
 
-        projects = owned_projects | member_projects
+        projects = (owned_projects | member_projects).distinct() 
 
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
+
+# Tính toán phần trăm hoàn thành
+class ProjectProgressView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+
+        # Kiểm tra quyền truy cập
+        if request.user != project.owner and request.user not in project.members.all():
+            return Response({'error': 'Bạn không có quyền truy cập project này.'}, status=403)
+
+        # Lấy danh sách task
+        tasks = Task.objects.filter(projectId=project)
+        total = tasks.count()
+
+        # Đếm từng loại task
+        todo_count = tasks.filter(status='todo').count()
+        doing_count = tasks.filter(status='doing').count()
+        done_count = tasks.filter(status='done').count()
+
+        # Tránh chia cho 0
+        if total == 0:
+            todo_percent = doing_percent = done_percent = progress_percent = 0
+        else:
+            todo_percent = round((todo_count / total) * 100, 2)
+            doing_percent = round((doing_count / total) * 100, 2)
+            done_percent = round((done_count / total) * 100, 2)
+            progress_percent = done_percent  # dùng lại luôn
+
+        return Response({
+            'project_id': project.id,
+            'project_name': project.name,
+            'total_tasks': total,
+            'todo': {
+                'count': todo_count,
+                'percent': todo_percent
+            },
+            'doing': {
+                'count': doing_count,
+                'percent': doing_percent
+            },
+            'done': {
+                'count': done_count,
+                'percent': done_percent
+            },
+            'progress_percent': progress_percent
+        })

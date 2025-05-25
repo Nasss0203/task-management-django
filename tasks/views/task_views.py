@@ -69,16 +69,27 @@ class TaskDetailView(APIView):
         return Response(serializer.data)
 
 class UpdateTaskView(APIView):
-    permission_classes = [IsAuthenticated, IsTaskOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
         try:
             pk = uuid.UUID(pk)
         except ValueError:
             return Response({"detail": "Invalid UUID format."}, status=400)
-        
-        task = get_object_or_404(Task, id=pk, userId=request.user)
-        # Cập nhật công việc với dữ liệu từ request, cho phép cập nhật một phần
+
+        # Lấy task
+        task = get_object_or_404(Task, id=pk)
+
+        # Kiểm tra quyền truy cập
+        if task.projectId:  # Nếu task thuộc về một project
+            if request.user != task.userId and request.user not in task.projectId.members.all():
+                if not (hasattr(request.user, 'role') and request.user.role in ['admin', 'manager']):
+                    return Response({'error': 'Bạn không có quyền cập nhật task này.'}, status=status.HTTP_403_FORBIDDEN)
+        else:  # Nếu task không thuộc project nào
+            if request.user != task.userId:
+                return Response({'error': 'Bạn không có quyền cập nhật task này.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Cập nhật task
         serializer = TaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -105,17 +116,21 @@ class ProjectTaskListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, project_id):
-        try:
-            project = Project.objects.get(id=project_id, members=request.user)
-        except Project.DoesNotExist:
-            return Response({"detail": "Project not found or you are not a member."}, status=status.HTTP_404_NOT_FOUND)
+        project = get_object_or_404(Project, pk=project_id)
 
-        tasks = Task.objects.filter(projectId=project).order_by('-createdAt')
+        if request.user != project.owner and request.user not in project.members.all():
+            if not (hasattr(request.user, 'role') and request.user.role in ['admin', 'manager']):
+                return Response({'error': 'Bạn không có quyền truy cập project này.'}, status=status.HTTP_403_FORBIDDEN)
+
+        tasks = Task.objects.filter(projectId=project)
+
+        status_param = request.query_params.get('status')
+        if status_param:
+            tasks = tasks.filter(status=status_param)
+
         if not tasks.exists():
             return Response({"detail": "No tasks found for this project."}, status=status.HTTP_404_NOT_FOUND)
-
+        
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
-    
-
 # End Tasks
