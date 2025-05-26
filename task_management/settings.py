@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-3t6i++n30ts+(50x-psec&8^)ltvy7j9ccoc695y@vw81&-^9a
 DEBUG = True
 
 ALLOWED_HOSTS = []
-AUTH_USER_MODEL = 'users.User'  # Tên app + tên model
+AUTH_USER_MODEL = 'users.User'  
 
 
 # Application definition
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'tasks',
     'notifications',
     'corsheaders',
-
+    'mess',
 ]
 
 MIDDLEWARE = [
