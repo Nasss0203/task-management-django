@@ -206,31 +206,28 @@ class ProjectProgressView(APIView):
     def get(self, request, project_id):
         project = get_object_or_404(Project, pk=project_id)
 
-        # Kiểm tra quyền truy cập
         if request.user != project.owner and request.user not in project.members.all():
             return Response({'error': 'Bạn không có quyền truy cập project này.'}, status=403)
 
-        # Lấy danh sách task
         tasks = Task.objects.filter(projectId=project)
         total = tasks.count()
 
-        # Đếm từng loại task
         todo_count = tasks.filter(status='todo').count()
         doing_count = tasks.filter(status='doing').count()
         done_count = tasks.filter(status='done').count()
 
-        # Tránh chia cho 0
         if total == 0:
             todo_percent = doing_percent = done_percent = progress_percent = 0
         else:
             todo_percent = round((todo_count / total) * 100, 2)
             doing_percent = round((doing_count / total) * 100, 2)
             done_percent = round((done_count / total) * 100, 2)
-            progress_percent = done_percent  # dùng lại luôn
+            progress_percent = done_percent
 
         return Response({
             'project_id': project.id,
             'project_name': project.name,
+            'status': project.status,
             'total_tasks': total,
             'todo': {
                 'count': todo_count,

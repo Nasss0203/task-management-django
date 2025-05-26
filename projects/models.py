@@ -43,7 +43,7 @@ class Project(models.Model):
 
     # Trạng thái và quản lý thời gian
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo', blank=True, null=True)
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium',blank=True, null=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low',blank=True, null=True)
     start_date = models.DateField()
     end_date = models.DateField(default=default_end_date, blank=True)
 
