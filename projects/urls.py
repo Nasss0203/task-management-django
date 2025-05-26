@@ -40,8 +40,9 @@ urlpatterns = [
     # Danh sách thành viên của project
     path('members/<str:project_id>/', ProjectMembersView.as_view(), name='project-members'),
 
-
+    # Lấy tiến độ của project
     path('progress/<str:project_id>/', ProjectProgressView.as_view(), name='project-progress'),
 
 
+ 
 ]

@@ -5,19 +5,23 @@ from projects.models import Project
 
 @receiver(post_save, sender=Task)
 def update_project_status(sender, instance, **kwargs):
-    project = instance.projectId  # Lấy project liên quan đến task
+    project = instance.projectId  
     if not project:
         return
 
-    # Lấy tất cả các task liên quan đến project
     tasks = project.tasks.all()
 
-    # Kiểm tra trạng thái của các task
-    if tasks.filter(status='doing').exists():
-        project.status = 'active'  # Đặt trạng thái project là "started"
-    elif tasks.filter(status='todo').exists():
-        project.status = 'todo'  # Nếu còn task "todo", project chưa bắt đầu
+    if not tasks.exists():
+        project.status = 'todo'  
     elif tasks.filter(status='done').count() == tasks.count():
-        project.status = 'done'  # Nếu tất cả task đều "done", project hoàn thành
+        project.status = 'done'
+    elif tasks.filter(status='doing').exists() or tasks.filter(status='todo').exists():
+        if tasks.filter(status='todo').count() == tasks.count():
+            project.status = 'todo'
+        else:
+            project.status = 'active'
+    else:
+        project.status = 'active'
+
 
     project.save()

@@ -76,23 +76,15 @@ class UserLoginView(APIView):
 
 
 class UserLogoutView(APIView):
-    print(APIView)
     permission_classes = [IsAuthenticated]
-    print(permission_classes)
+
     def post(self, request):
-        auth_header = request.headers.get('Authorization')
-        print(auth_header)
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return Response({'error': 'Thiếu Authorization header'}, status=400)
-
-        refresh_token = auth_header.split(' ')[1]
-        print(refresh_token)
-
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"error": "Thiếu refresh token."}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            # Kiểm tra token loại Refresh
             token = RefreshToken(refresh_token)
-            # Chỉ blacklist refresh token
             token.blacklist()
-            return Response({'message': 'Đăng xuất thành công.'}, status=205)
+            return Response({"message": "Đăng xuất thành công."}, status=status.HTTP_205_RESET_CONTENT)
         except TokenError as e:
-            return Response({'error': f'Token không hợp lệ hoặc đã hết hạn: {str(e)}'}, status=400)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
