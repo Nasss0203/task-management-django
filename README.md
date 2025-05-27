@@ -21,6 +21,7 @@
         pip install django-cors-headers
         pip install cryptography
         pip install pymysql
+        pip install openpyxl
 
 ## 3. Cấu hình kết nối MySQL trong settings.py:
 
