@@ -2,15 +2,8 @@
 
 ## 1. Tạo và kích hoạt môi trường ảo:
 
-    - Windows:
-
-        python -m venv .venv
-        .venv\Scripts\activate
-
-    - macOS / Linux:
-
-        python3 -m venv .venv
-        source .venv/bin/activate
+    python -m venv .venv
+    .venv\Scripts\activate
 
 ## 2. Cài đặt thư viện phụ thuộc:
 
@@ -36,11 +29,6 @@
         }
     }
 
-    Nếu dùng pymysql, thêm vào __init__.py (trong cùng thư mục với settings.py):
-
-        import pymysql
-        pymysql.install_as_MySQLdb()
-
 ## 4. Quản lý cơ sở dữ liệu:
 
     Tạo migration:
@@ -50,18 +38,6 @@
     Áp dụng migration:
 
         python manage.py migrate
-
-    Nếu đã có CSDL và muốn đánh dấu migrate ban đầu:
-
-        python manage.py migrate --fake-initial
-
-    Truy cập shell Django:
-
-        python manage.py shell
-
-    Sinh model từ database có sẵn:
-
-        python manage.py inspectdb
 
 ## 5. Chạy ứng dụng:
 

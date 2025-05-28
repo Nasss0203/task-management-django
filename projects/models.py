@@ -27,7 +27,6 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
-    # Quan hệ chính
     owner = models.ForeignKey(
         'users.User',
         on_delete=models.CASCADE,
@@ -41,13 +40,11 @@ class Project(models.Model):
         blank=True
     )
 
-    # Trạng thái và quản lý thời gian
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo', blank=True, null=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low',blank=True, null=True)
     start_date = models.DateField()
     end_date = models.DateField(default=default_end_date, blank=True)
 
-    # Quản lý vòng đời
     is_archived = models.BooleanField(default=False)
     is_personal = models.BooleanField(default=False)
     createdAt = models.DateTimeField(auto_now_add=True)

@@ -25,14 +25,14 @@ class Task(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='tasks'  # thêm dòng này
+        related_name='tasks' 
     )
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES)
     due_date = models.DateField()
-    # tags = models.ManyToManyField(Tag, blank=True, related_name='tasks')
+
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True, null=True)
 

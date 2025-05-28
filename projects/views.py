@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404
 
-# Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -11,6 +10,7 @@ from .serializers import ProjectSerializer,UserSerializer
 from users.models import User
 from tasks.models import Task
 
+# Hiện danh sách các project
 class ProjectListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -28,7 +28,7 @@ class ProjectListView(APIView):
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
 
-
+# Tạo project
 class ProjectCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -45,7 +45,7 @@ class ProjectCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# hiện chi tiết project
 class ProjectDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -58,7 +58,7 @@ class ProjectDetailView(APIView):
         serializer = ProjectSerializer(project)
         return Response(serializer.data)
 
-
+# Update project
 class ProjectUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -83,7 +83,7 @@ class ProjectUpdateView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# xóa project đồng thời sẽ xóa các task trong project
 class ProjectDeleteView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -100,7 +100,7 @@ class ProjectDeleteView(APIView):
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+# Thêm member vào project
 class ProjectAddMemberView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -121,7 +121,7 @@ class ProjectAddMemberView(APIView):
 
         return Response({"detail": f"User {user_id} added to project members."}, status=status.HTTP_200_OK)
 
-
+# Thêm task vào project
 class TaskCreateInProjectView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -133,12 +133,12 @@ class TaskCreateInProjectView(APIView):
             return Response({'error': 'task_id is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         task = get_object_or_404(Task, pk=task_id, userId=request.user)
-        task.projectId = project  # Sửa dòng này
+        task.projectId = project
         task.save()
 
         return Response({'message': 'Task added to project successfully.'})
     
-
+# xóa member khỏi project
 class RemoveMemberFromProjectView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, project_id):
@@ -154,7 +154,7 @@ class RemoveMemberFromProjectView(APIView):
         project.save()
         return Response({'message': 'Member removed from project.'}, status=status.HTTP_200_OK)
     
-
+# xóa task khỏi project
 class RemoveTaskFromProjectView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request, project_id):
